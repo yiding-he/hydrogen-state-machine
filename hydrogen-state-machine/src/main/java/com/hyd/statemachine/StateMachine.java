@@ -69,6 +69,13 @@ public class StateMachine<S extends Enum<?>, E extends Enum<?>, C> {
         return Collections.unmodifiableSet(this.transitionConfig.getHandlerRules());
     }
 
+    /**
+     * 执行处理
+     *
+     * @param state   当前状态
+     * @param event   当前事件类型
+     * @param context 本次处理的上下文信息，将会传递给 {@link StateChangeHandler}
+     */
     public void process(S state, E event, C context) {
         TransitionRule<S, E> rule = this.transitionConfig.getTransitionRules()
             .stream()
