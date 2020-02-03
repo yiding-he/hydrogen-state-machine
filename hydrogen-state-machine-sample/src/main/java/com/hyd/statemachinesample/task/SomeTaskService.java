@@ -3,7 +3,6 @@ package com.hyd.statemachinesample.task;
 import com.hyd.dao.DAO;
 import com.hyd.statemachine.StateMachine;
 import com.hyd.statemachinesample.mockapi.MockApiService;
-import com.hyd.statemachinesample.mockapi.RequestResult;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +32,7 @@ public class SomeTaskService {
         );
 
         taskList.forEach(task -> {
-            RequestResult requestResult = mockApiService.request(task.getId());
+            mockApiService.request(task.getId());
 
         });
     }

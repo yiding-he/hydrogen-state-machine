@@ -1,17 +1,26 @@
 package com.hyd.statemachinesample.mockapi;
 
+import java.util.Random;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 @Service
 public class MockApiService {
 
-    public RequestResult request(Long taskId) {
+    private Random random = new Random();
+
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    public void request(Long taskId) {
         // todo 需要实现这个方法
-        return new RequestResult();
+        ResultCode[] values = ResultCode.values();
+        ResultCode resultCode = values[random.nextInt(values.length)];
+
     }
 
-    public VerifyResult verify(Long taskId) {
+    public void verify(Long taskId) {
         // todo 需要实现这个方法
-        return new VerifyResult();
     }
 }
