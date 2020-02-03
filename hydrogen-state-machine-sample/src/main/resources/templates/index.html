@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<ul>
+    <li th:each="task: ${tasks}" th:text="${'task ' + task.id + ' : ' + task.state}"></li>
+</ul>
+</body>
+<p>
+    <a href="action/request">Request</a>
+    <a href="action/verify">Verify</a>
+</p>
+</html>
