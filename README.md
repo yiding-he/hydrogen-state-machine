@@ -1,12 +1,31 @@
 # hydrogen-state-machine
 
-A state machine implementation for simple use.
+hydrogen-state-machine 是一个简单的状态机。
 
-### Concepts:
+### 状态机的基本概念
 
-- `State` and `EventType` are enum types.
-- Objects have state.
-- Events have type.
-- Set up a state machine with rules, guards and handlers.
-- Send an object and an event to a state machine, and handle the result.
+- 状态机用来帮助处理对象的**状态**变化。当对象持久化到数据库时，也就是处理数据库记录的状态变化。
+
+- **状态**变化是由**事件**触发的，一个**状态**遇到某类**事件**触发时，会转变成另一个状态。
+
+- 转变成哪个状态由**规则**决定。一个状态机包含一组**规则**，状态机通过查询**规则**来得到状态变化的结果。
+
+- 状态机在这个基础上再加入**侦听**（Listener）和 **拦截**（Interceptor）机制，以满足更复杂的场景需要。
+
+### 使用状态机的好处
+
+状态机的作用就是将处理状态变化的代码提取成结构化的表达，也就是将 `if-else` 指令提取成一组相同结构的规则记录，使得：
+
+- 业务方能够更加容易看懂并核查这些规则；
+
+- 简化代码的编写；
+
+- 方便日志打印、调试、测试和故障排查。
+
+### hydrogen-state-machine 的特性
+
+- 线程安全
+
+- 处理方式是同步的，因此可以在数据库事务中使用
+
 

@@ -3,38 +3,33 @@ package com.hyd.statemachine;
 import com.hyd.statemachine.config.EventConfig;
 import com.hyd.statemachine.config.StateConfig;
 import com.hyd.statemachine.config.TransitionConfig;
-
 import java.util.Collections;
 import java.util.Set;
 
 /**
  * 状态机的默认实现
  *
- * <ul>
- *     <li>状态机是线程安全的</li>
- *     <li>状态机的处理是同步的，在当前线程中进行</li>
- * </ul>
- *
- * @param <S> 状态类型
- * @param <E> 事件类型
- * @param <C> 事件上下文对象类型
+ * @param <O> Object 带状态的对象类型
+ * @param <S> State 状态类型
+ * @param <E> Event 事件对象类型
+ * @param <T> Type 事件类型
  */
-public class StateMachine<S extends Enum<?>, E extends Enum<?>, C> {
+public class StateMachine<O, S extends Enum<?>, E, T extends Enum<?>> {
 
     /**
      * 状态配置
      */
-    private final StateConfig<S> stateConfig;
+    private final StateConfig<O, S> stateConfig;
 
     /**
-     * 事件配置
+     * 事件配置T
      */
-    private final EventConfig<E> eventConfig;
+    private final EventConfig<E, T> eventConfig;
 
     /**
      * 状态转换规则配置
      */
-    private final TransitionConfig<S, E, C> transitionConfig;
+    private final TransitionConfig<O, S, E, T> transitionConfig;
 
     /**
      * 构造方法
@@ -44,9 +39,9 @@ public class StateMachine<S extends Enum<?>, E extends Enum<?>, C> {
      * @param transitionConfig 有哪些规则
      */
     public StateMachine(
-        StateConfig<S> stateConfig,
-        EventConfig<E> eventConfig,
-        TransitionConfig<S, E, C> transitionConfig
+        StateConfig<O, S> stateConfig,
+        EventConfig<E, T> eventConfig,
+        TransitionConfig<O, S, E, T> transitionConfig
     ) {
         this.stateConfig = stateConfig;
         this.eventConfig = eventConfig;
@@ -57,40 +52,43 @@ public class StateMachine<S extends Enum<?>, E extends Enum<?>, C> {
         return this.stateConfig.getStateSet();
     }
 
-    public Set<E> getEventSet() {
+    public Set<T> getEventSet() {
         return this.eventConfig.getEventSet();
     }
 
-    public Set<TransitionRule<S, E>> getTransitionRules() {
+    public Set<TransitionRule<S, T>> getTransitionRules() {
         return Collections.unmodifiableSet(this.transitionConfig.getTransitionRules());
     }
 
-    public Set<HandlerRule<S, E, C>> getHandlerRules() {
+    public Set<HandlerRule<O, S, E, T>> getHandlerRules() {
         return Collections.unmodifiableSet(this.transitionConfig.getHandlerRules());
     }
 
     /**
-     * 执行处理
+     * 根据事件进行状态处理
      *
-     * @param state   当前状态
-     * @param event   当前事件类型
-     * @param context 本次处理的上下文信息，将会传递给 {@link StateChangeHandler}
+     * @param object 带状态的对象
+     * @param event  事件
      */
-    public void process(S state, E event, C context) {
-        TransitionRule<S, E> rule = this.transitionConfig.getTransitionRules()
+    public void process(O object, E event) {
+
+        T eventType = this.eventConfig.getEventTypeExtractor().apply(event);
+        S sourceState = this.stateConfig.getStateExtractor().apply(object);
+
+        TransitionRule<S, T> rule = this.transitionConfig.getTransitionRules()
             .stream()
-            .filter(r -> r.getSource() == state && r.getEvent() == event)
+            .filter(r -> r.getSource() == sourceState && r.getEventType() == eventType)
             .findFirst()
             .orElseThrow(() -> new UnsupportedOperationException(
-                "Unable to match transition rule, state=" + state + ", event=" + event
+                "Unable to match transition rule, object=" + object + ", event=" + event
             ));
 
         this.transitionConfig.getHandlerRules()
             .stream()
-            .filter(r -> r.match(state, rule.getTarget(), event))
+            .filter(r -> r.match(sourceState, rule.getTarget(), eventType))
             .findFirst()
             .ifPresent(handlerRule ->
-                handlerRule.getHandler().stateChanged(state, rule.getTarget(), event, context)
+                handlerRule.getHandler().stateChanged(sourceState, rule.getTarget(), object, event)
             );
     }
 }

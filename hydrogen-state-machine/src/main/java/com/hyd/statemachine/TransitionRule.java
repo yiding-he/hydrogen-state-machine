@@ -1,17 +1,17 @@
 package com.hyd.statemachine;
 
-public class TransitionRule<S extends Enum<?>, E extends Enum<?>> {
+public class TransitionRule<S extends Enum<?>, T extends Enum<?>> {
 
     private final S source;
 
     private final S target;
 
-    private final E event;
+    private final T eventType;
 
-    public TransitionRule(S source, S target, E event) {
+    public TransitionRule(S source, S target, T eventType) {
         this.source = source;
         this.target = target;
-        this.event = event;
+        this.eventType = eventType;
     }
 
     public S getSource() {
@@ -22,8 +22,8 @@ public class TransitionRule<S extends Enum<?>, E extends Enum<?>> {
         return target;
     }
 
-    public E getEvent() {
-        return event;
+    public T getEventType() {
+        return eventType;
     }
 
     @Override
@@ -31,7 +31,7 @@ public class TransitionRule<S extends Enum<?>, E extends Enum<?>> {
         return "TransitionRule{" +
             "source=" + source +
             ", target=" + target +
-            ", event=" + event +
+            ", eventType=" + eventType +
             '}';
     }
 }

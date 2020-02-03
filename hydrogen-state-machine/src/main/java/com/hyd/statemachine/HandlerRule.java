@@ -1,19 +1,19 @@
 package com.hyd.statemachine;
 
-public class HandlerRule<S extends Enum<?>, E extends Enum<?>, C> {
+public class HandlerRule<O, S extends Enum<?>, E, T extends Enum<?>> {
 
     private final S source;
 
     private final S target;
 
-    private final E event;
+    private final T eventType;
 
-    private final StateChangeHandler<S, E, C> handler;
+    private final StateChangeHandler<O, S, E, T> handler;
 
-    public HandlerRule(S source, S target, E event, StateChangeHandler<S, E, C> handler) {
+    public HandlerRule(S source, S target, T eventType, StateChangeHandler<O, S, E, T> handler) {
         this.source = source;
         this.target = target;
-        this.event = event;
+        this.eventType = eventType;
         this.handler = handler;
     }
 
@@ -25,19 +25,19 @@ public class HandlerRule<S extends Enum<?>, E extends Enum<?>, C> {
         return target;
     }
 
-    public E getEvent() {
-        return event;
+    public T getEventType() {
+        return eventType;
     }
 
-    public StateChangeHandler<S, E, C> getHandler() {
+    public StateChangeHandler<O, S, E, T> getHandler() {
         return handler;
     }
 
-    public boolean match(S source, S target, E event) {
+    public boolean match(S source, S target, T eventType) {
         return
             (this.source == source || this.source == null) &&
-            (this.target == target || this.target == null) &&
-            (this.event == event || this.event == null)
+                (this.target == target || this.target == null) &&
+                (this.eventType == eventType || this.eventType == null)
             ;
     }
 
@@ -46,7 +46,7 @@ public class HandlerRule<S extends Enum<?>, E extends Enum<?>, C> {
         return "HandlerRule{" +
             "source=" + source +
             ", target=" + target +
-            ", event=" + event +
+            ", eventType=" + eventType +
             '}';
     }
 }

@@ -8,19 +8,22 @@ public class StateMachineTest {
     public void testBuild() throws Exception {
 
         // 当订单支付时的处理
-        StateChangeHandler<OrderStates, OrderEventTypes, OrderEventContext> orderPaidHandler =
+        StateChangeHandler<Order, OrderStates, OrderEvent, OrderEventTypes> orderPaidHandler =
             (source, target, event, context) ->
                 System.out.println("订单 " + context.getOrder().getOrderId() + " 支付成功。");
 
         // 当订单取消时的处理
-        StateChangeHandler<OrderStates, OrderEventTypes, OrderEventContext> orderCancelledHandler =
+        StateChangeHandler<Order, OrderStates, OrderEvent, OrderEventTypes> orderCancelledHandler =
             (source, target, event, context) ->
                 System.out.println("订单 " + context.getOrder().getOrderId() + " 已取消支付。");
 
         // 构建状态机对象
-        StateMachineBuilder<OrderStates, OrderEventTypes, OrderEventContext>
+        StateMachineBuilder<Order, OrderStates, OrderEvent, OrderEventTypes>
             builder = StateMachineBuilder
-            .newBuilder(OrderStates.class, OrderEventTypes.class, OrderEventContext.class)
+            .newBuilder(Order.class, OrderStates.class, OrderEvent.class, OrderEventTypes.class)
+
+            .setStateExtractor(Order::getOrderState)
+            .setEventTypeExtractor(OrderEvent::getEventType)
 
             .addRule(OrderStates.Init, OrderStates.Paid, OrderEventTypes.OrderPaid)
             .addRule(OrderStates.Paid, OrderStates.Fulfilled, OrderEventTypes.OrderFulfilled)
@@ -30,7 +33,7 @@ public class StateMachineTest {
             .addHandler(null, OrderStates.Paid, null, orderPaidHandler)
             .addHandler(null, OrderStates.Cancelled, null, orderCancelledHandler);
 
-        StateMachine<OrderStates, OrderEventTypes, OrderEventContext>
+        StateMachine<Order, OrderStates, OrderEvent, OrderEventTypes>
             stateMachine = builder.build();
 
         // 查看状态机的属性
@@ -42,20 +45,18 @@ public class StateMachineTest {
 
         // 状态机根据已有规则进行计算
         Order order1 = new Order(1, OrderStates.Init);
-        stateMachine.process(
-            order1.getOrderState(), OrderEventTypes.OrderPaid, new OrderEventContext(order1)
-        );
+        OrderEvent order1Paid = new OrderEvent(order1, OrderEventTypes.OrderPaid);
+        stateMachine.process(order1, order1Paid);
+
         Order order2 = new Order(2, OrderStates.Paid);
-        stateMachine.process(
-            order2.getOrderState(), OrderEventTypes.OrderCancelled, new OrderEventContext(order2)
-        );
+        OrderEvent order2Cancelled = new OrderEvent(order2, OrderEventTypes.OrderCancelled);
+        stateMachine.process(order2, order2Cancelled);
 
         // 如果状态机没有对应的规则，则会抛出异常
         try {
             Order order3 = new Order(3, OrderStates.Cancelled);
-            stateMachine.process(
-                order3.getOrderState(), OrderEventTypes.OrderPaid, new OrderEventContext(order3)
-            );
+            OrderEvent order3Cancelled = new OrderEvent(order3, OrderEventTypes.OrderCancelled);
+            stateMachine.process(order3, order3Cancelled);
         } catch (Exception e) {
             e.printStackTrace();
         }
